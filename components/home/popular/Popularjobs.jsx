@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,11 +10,24 @@ import styles from "./popularjobs.style";
 import { useRouter } from "expo-router";
 import { COLORS, SIZES } from "../../../constants";
 import PopularJobCard from "../../common/cards/popular/PopularJobCard";
+import useFetch from '../../../hook/useFetch';
 
 const Popularjobs = () => {
   const router = useRouter();
-  const [isloading, setIsloading] = useState(false);
-  const [error, setError] = useState(false);
+  
+  //first param is the endpoint, second is the query
+  const { data, isloading, error, refetch } = useFetch('search', {
+    query: 'React Developer',
+    page: 1,
+    num_pages: 1,
+  }); 
+
+  const [selectedJob, setSelectedJob] = useState();
+
+  const handleCardPress = (item) => {
+    router.push(`/job-details/{item?.job_id}`);
+    setSelectedJob(item.job_id);
+  }
 
   return (
     <View style={styles.container}>
@@ -33,8 +46,8 @@ const Popularjobs = () => {
         ) : (
           <FlatList
             keyExtractor={(item) => item?.job_id}
-            data={[1, 2, 3, 4]}
-            renderItem={({ item }) => <PopularJobCard item={item} />}
+            data={data}
+            renderItem={({ item }) => <PopularJobCard item={item} handleCardPress={() => handleCardPress(item)} />}
             contentContainerStyle={{ columnGap: SIZES.medium }}
             horizontal
             showsHorizontalScrollIndicator={false}
